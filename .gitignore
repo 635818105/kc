@@ -1,0 +1,12 @@
+.idea/
+*.pyc
+*env
+.env*
+*.log
+/.git/
+.DS_Store
+test_api
+test.log.txt
+.flask_cache/
+.env
+/static/upload/monthfee/*
