@@ -1,16 +1,17 @@
 import time
 import logging
 import traceback
+
+from flask_cors import CORS
+
 from libs.pool_db import db
 from libs.utils.ajax import json_fail
 from libs.utils import auth_token
 from flask import Flask, Blueprint, make_response
-from flask_wtf.csrf import CSRFProtect
 from flask import request
 from config import Setting
 log = logging.getLogger(__name__)
 # CSRF
-csrf = CSRFProtect()
 # Flask实例
 app = None
 
@@ -27,6 +28,7 @@ def create_app(config=None):
     global app
     global socketio
     app = Flask(__name__)
+    CORS(app, supports_credentials=True)  # 设置参数
     # 使用默认配置
     app.config.from_object(Setting)
     # 更新配置
@@ -113,16 +115,17 @@ def cross_domain_access_before():
     Zuyong Du         2018-10-22
     ----------------------------------------
     """
-    if request.method == 'OPTIONS':
-        response = make_response()
-        response.headers['Access-Control-Max-Age'] = 24 * 60 * 60
-        # 请求方式说明
-        # 1.查询 post--有参数, get--无参数
-        # 2.添加 put
-        # 3.更新 patch
-        # 4.删除 delete
-        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH'
-        return response
+    pass
+    # if request.method == 'OPTIONS':
+    #     response = make_response()
+    #     response.headers['Access-Control-Max-Age'] = 24 * 60 * 60
+    #     # 请求方式说明
+    #     # 1.查询 post--有参数, get--无参数
+    #     # 2.添加 put
+    #     # 3.更新 patch
+    #     # 4.删除 delete
+    #     response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, PATCH'
+    #     return response
 
 
 def cross_domain_access_after(response):
