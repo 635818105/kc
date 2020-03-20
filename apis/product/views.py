@@ -1,7 +1,12 @@
 import datetime
+import json
+import re
 import time
 
+import requests
 from flask_restful import Resource, reqparse
+from qiniu import Auth, put_data
+from werkzeug.datastructures import FileStorage
 
 from libs.pool_db import db
 from libs.pool_db.db import Struct
@@ -236,3 +241,41 @@ class CategoryUpdate(Resource):
         return json_ok(message="更新成功")
 
 
+class FileUpload(Resource):
+    """
+    说明：上传文件
+    ----------------------------------------
+    修改人          修改日期          修改原因
+    ----------------------------------------
+    吕建威          2018-02-21
+    ----------------------------------------
+    备注：
+    type:
+    1 文件之类 cms_data
+    2 图片之类 cms_img
+    ----------------------------------------
+    2019-3-21 宋国洋  改造文件上传方法
+    """
+
+    @staticmethod
+    def post():
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument("type")
+            parser.add_argument("file", type=FileStorage, location="files")
+            args = parser.parse_args()
+            file_data = args.file
+            access_key = "cpeyHwtPxfxAbbw-qE9puxJME3PhtvEmpJ6omkkm"
+            secret_key = "ZGaUZws2nVownOvyXgEG5b-yAjpl-IR6ECx4yRaG"
+            q = Auth(access_key, secret_key)
+            # 要上传的空间
+            bucket_name = 'zdl-upload'
+            # 生成上传 Token，可以指定过期时间等
+            token = q.upload_token(bucket_name, None, 3600)
+            ret, info = put_data(token, None, file_data.read())
+            if info.status_code == 200:
+                # 表示上传成功, 返回文件名
+                url = "http://qiniu.adongo.cn/" + ret.get("key")
+                return json_ok({"file_url": url})
+        except Exception as e:
+            print(e, "上传文件失败！")
